@@ -75,7 +75,6 @@
 ;; handle the pad
 (on-event [:midi :note-on] (fn [{note :note}]
                              (stop)
-                             (println note)
                              (play-sample note))
           ::play-samples)
 
