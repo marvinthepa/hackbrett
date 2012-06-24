@@ -9,11 +9,15 @@
                                                javax.jms/jms
                                                com.sun.jdmk/jmxtools
                                                com.sun.jmx/jmxri]]
+                 [org.clojure/math.numeric-tower "0.0.1"] ;; TODO why?
                  ]
   :dev-dependencies [[org.clojars.scott/lein-nailgun "1.1.0"]
                      [vimclojure/server "2.3.1"]
                      [ring-mock "0.1.2"]
-                     [ring-serve "0.1.2"]]
+                     [ring-serve "0.1.2"]
+                     [midje "1.4.0"]
+                     [com.stuartsierra/lazytest "1.2.2"]]
   :plugins [[lein-ring "0.7.1"]]
-  :ring {:handler hackbrett.core/app})
+  :ring {:handler hackbrett.core/app
+         :init hackbrett.core/init})
 
