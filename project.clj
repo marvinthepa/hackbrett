@@ -1,7 +1,7 @@
 (defproject hackbrett "1.0.0-SNAPSHOT"
   :description "FIXME: write description"
   :dependencies [[org.clojure/clojure "1.3.0"]
-                 [overtone "0.7.0-SNAPSHOT"]
+                 [overtone "0.7.0"]
                  [compojure "0.6.5"]
                  [cheshire "4.0.0"]
                  [org.clojure/tools.logging "0.2.3"]
@@ -10,6 +10,7 @@
                                                com.sun.jdmk/jmxtools
                                                com.sun.jmx/jmxri]]
                  [org.clojure/math.numeric-tower "0.0.1"] ;; TODO why?
+                 [congomongo "0.1.9"]
                  ]
   :dev-dependencies [[org.clojars.scott/lein-nailgun "1.1.0"]
                      [vimclojure/server "2.3.1"]
