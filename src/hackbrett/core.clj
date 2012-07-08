@@ -14,14 +14,16 @@
 (def json cheshire/generate-string)
 
 (defn toi [x]
-  (Integer/parseInt x)) ;; TODO error handling
+  (Integer/parseInt x))
 
 (defroutes main-routes
-  (GET ["/midi-key/:midi-key" :midi-key #"[0-9]+"]
+  (GET "/" [] (redirect "/help"))
+
+  (GET ["/midi-key/:midi-key" :midi-key #"[0-9]{2,3}"]
        [midi-key]
        (json (mapping/get-binding (toi midi-key))))
 
-  (POST ["/midi-key/:midi-key" :midi-key #"[0-9]+"]
+  (POST ["/midi-key/:midi-key" :midi-key #"[0-9]{2,3}"]
         [midi-key]
         (sound/play-note (toi midi-key))
         "")
@@ -31,22 +33,21 @@
 
 
   (POST ["/midi-key/:midi-key/sample/:sample-name"
-         :midi-key #"[0-9]+"
+         :midi-key #"[0-9]{2,3}"
          :sample-name #"[^/]+"]
         [midi-key sample-name]
         (mapping/bind-sample (toi midi-key) sample-name)
         "")
 
-  (GET "/" [] (redirect "/pad"))
   (GET "/pad" []
        (json (mapping/get-scenes))
        )
   (GET ["/pad/scene/:scene"
-        :scene #"[0-9+]"]
+        :scene #"[1-4]"]
        [scene]
        (json (mapping/get-scene (toi scene))))
   (GET ["/pad/scene/:scene/button/:button"
-        :scene #"[0-9]+"
+        :scene #"[1-4]"
         :button #"[0-9]+"]
        [scene button]
        (json (mapping/get-button (toi scene) (toi button))))
@@ -54,6 +55,27 @@
   (GET "/sample" []
        (json (mapping/get-samples)))
 
+  (GET "/help" []
+       {
+        :content-type "text/plain; charset=utf-8"
+        :body
+       "Welcome to Hackbrett.
+
+ list all existing samples:
+   curl 'http://hackbrett/sample'
+ upload a new sample
+   curl -T sounds/baby.wav 'http://hackbrett/sample/baby.wav'
+ upload a new sample and play it immediately:
+   curl -T sounds/baby.wav 'http://hackbrett/sample/baby.wav?play=true'
+
+ list existing samples bound to midi-keys:
+   curl 'http://hackbrett/midi-key'
+ play an existing sample by midi-key:
+   curl -X POST 'http://hackbrett/midi-key/39'
+
+show the mapping of nano-pad scenes and buttons to midi-keys:
+   curl 'http://hackbrett/pad'
+       "})
 
 ;  (POST ["/pad/scene/:scene/button/:button"
 ;         :scene #"[0-9]+"

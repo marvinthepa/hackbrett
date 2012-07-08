@@ -64,7 +64,6 @@
     path))
 
 (defn bind-sample [midi-key sample-name]
-  ;; TODO check if there is a sample with that id..
   (if (zero? (mongo/fetch-count
                 :samples
                 :where {:id-filename sample-name}))
