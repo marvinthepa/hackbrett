@@ -1,6 +1,7 @@
 (ns hackbrett.core
   (:use compojure.core
-        ring.middleware.multipart-params
+        [ring.middleware.multipart-params :only [wrap-multipart-params]]
+        [ring.middleware.params :only [wrap-params]]
         [ring.util.response :only [redirect]]
        ; [ring.middleware.reload :only [wrap-reload]]
         )
@@ -59,16 +60,18 @@
 ;                           (toi button)
 ;                           (toi sampleid)))
 ;
+  ; TODO check if this is a wav file, error or conversion (xuggle.com or mplayer)
   (wrap-multipart-params ;; TODO needed? get the filename from the multipart-params instead?
-                         (PUT ["/sample/:filename" :filename #"[^/]+"] ;; TODO GET on same url..
-                              {{filename :filename} :params
-                               body :body
-                               :as request}
-                              ;; TODO need a "transaction" here
-                              (let [real-filename (mapping/add-file body filename)
-                                    ;; TODO free-sample if the sample replaced another of the same name
-                                    _ (sound/load-sample real-filename)]
-                                (json/generate-string "OK")))) ;; TODO stupid, use locator for sample info instead
+     (PUT ["/sample/:filename" :filename #"[^/]+"] ;; TODO GET on same url..
+          {{filename :filename play :play} :params
+           body :body
+           :as request}
+          (let [real-filename (mapping/add-file body filename)
+                ;; TODO free-sample if the sample replaced another of the same name
+                _ (sound/load-sample real-filename)]
+            (if play
+              (sound/play-file real-filename))
+            (json/generate-string "OK")))) ;; TODO stupid, use locator for sample info instead
 
   (route/resources "/") ;; TODO
   (route/not-found "404 - Oh noes, there's nothing here!") ;; TODO something cooler
@@ -79,6 +82,7 @@
 (def app
   (->
     (handler/site main-routes)
+    wrap-params
     ))
 
 (defn init []

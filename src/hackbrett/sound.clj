@@ -12,14 +12,14 @@
 (def load-sample overtone/load-sample) ;; TODO metadata
 
 (defn play-file [filename]
-  (if-let [sample (@overtone/loaded-samples* [filename nil])]
+  (if-let [sample (@overtone/loaded-samples*
+                     [(canonical-path filename)nil])]
     (overtone/sample-player sample)
     (warn "no sample with filename " filename)))
 
 (defn play-note [note]
   (overtone/stop)
-  (if-let [filename (canonical-path
-                      (mapping/get-sample-filename note))]
+  (if-let [filename (mapping/get-sample-filename note)]
     (play-file filename)
     (warn "no sample for midi note " note)))
 
