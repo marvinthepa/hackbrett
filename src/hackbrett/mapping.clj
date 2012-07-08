@@ -1,11 +1,12 @@
 (ns hackbrett.mapping
-  (:use hackbrett.util)
-  (:use clojure.pprint)
-  (:require [somnium.congomongo :as mongo]) ;; TODO consider moving to mongo ns
-  (:use [clojure.tools.logging :only [error]])
-  (:use [clojure.java.io :only [copy output-stream delete-file]])
-  (:import com.eaio.uuid.UUID)
-  )
+  (:use hackbrett.util
+        clojure.pprint
+        [clojure.tools.logging :only [error]]
+        [clojure.java.io :only [copy output-stream delete-file]]
+        [somnium.congomongo :as mongo]
+        [hackbrett.mongo :as db] ;; TODO consider moving to mongo ns
+        )
+  (:import com.eaio.uuid.UUID))
 
 (defn get-samples []
   (mongo/fetch :samples))
@@ -17,6 +18,22 @@
         sample (mongo/fetch-one :samples
                                 :where {:id-filename id-filename})]
     (:real-filename sample)))
+
+(defn find-first [coll key val]
+  (first (filter #(= (% key) val) coll)))
+
+;; request handlers
+(defn get-scenes []
+  (:scenes (db/get-nano-pad)))
+
+(defn get-scene [scene]
+  (-> (get-scenes)
+    (find-first :scene scene)))
+
+(defn get-button [scene button]
+  (-> (get-scene scene)
+     :buttons
+    (find-first :button button)))
 
 (defn add-file [body filename]
   (let [path (str "sounds/uploaded/" (UUID.) ".wav")
