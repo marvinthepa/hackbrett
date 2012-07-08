@@ -8,6 +8,8 @@
         )
   (:import com.eaio.uuid.UUID))
 
+;; TODO split  pad-related and midi-related stuff in their own namespaces
+
 (defn get-samples []
   (mongo/fetch :samples))
 
@@ -22,7 +24,21 @@
 (defn find-first [coll key val]
   (first (filter #(= (% key) val) coll)))
 
+(defn clean-binding [binding]
+  (select-keys binding [:id-filename :midi-key]))
+
 ;; request handlers
+(defn get-bindings []
+  (map clean-binding
+    (mongo/fetch :bindings)))
+
+(defn get-binding [midi-key]
+  (clean-binding (mongo/fetch-one :bindings :where {:midi-key midi-key})))
+
+(defn get-samples []
+  (map :id-filename
+    (mongo/fetch :samples)))
+
 (defn get-scenes []
   (:scenes (db/get-nano-pad)))
 

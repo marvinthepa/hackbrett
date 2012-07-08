@@ -4,6 +4,21 @@
 (defn get-nano-pad []
   (fetch-one :controllers :where {:name :nano-pad}))
 
+;; TODO maybe change buttons to a collection instead
+;(defonce pad-keys
+;  [39 48 45 43 51 49 36 38 40 42 44 46 ; scene 1
+;   60 61 62 63 64 65 66 67 68 69 70 71 ; scene 2
+;   72 73 74 75 76 77 78 79 80 81 82 83 ; scene 3
+;   84 85 86 87 88 89 90 91 92 93 94 95]  ; scene 4
+;(defonce buttons
+;  (into {}
+;        (map
+;          (fn [hmap midi-key]
+;            [midi-key (assoc hmap :midi-key midi-key)])
+;          (for [scene (range 1 5)
+;                button (range 1 13)]
+;            {:scene scene :button button})
+;          pad-keys)))
 (defn init-nano-pad []
   (when (zero? (fetch-count
                  :controllers

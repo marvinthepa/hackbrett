@@ -17,10 +17,18 @@
   (Integer/parseInt x)) ;; TODO error handling
 
 (defroutes main-routes
+  (GET ["/midi-key/:midi-key" :midi-key #"[0-9]+"]
+       [midi-key]
+       (json (mapping/get-binding (toi midi-key))))
+
   (POST ["/midi-key/:midi-key" :midi-key #"[0-9]+"]
         [midi-key]
         (sound/play-note (toi midi-key))
         "")
+
+  (GET "/midi-key" []
+       (json (mapping/get-bindings)))
+
 
   (POST ["/midi-key/:midi-key/sample/:sample-name"
          :midi-key #"[0-9]+"
@@ -43,9 +51,10 @@
        [scene button]
        (json (mapping/get-button (toi scene) (toi button))))
 
-;  (GET "/sample" []
-;       (json (mapping/list-samples)))
-;
+  (GET "/sample" []
+       (json (mapping/get-samples)))
+
+
 ;  (POST ["/pad/scene/:scene/button/:button"
 ;         :scene #"[0-9]+"
 ;         :button #"[0-9]+"]
@@ -61,7 +70,7 @@
 ;        (mapping/bind-sample (toi scene)
 ;                           (toi button)
 ;                           (toi sampleid)))
-;
+
   ; TODO check if this is a wav file, error or conversion (xuggle.com or mplayer)
   (PUT ["/sample/:filename" :filename #"[^/]+"] ;; TODO GET on same url..
        {{filename :filename play :play} :params
