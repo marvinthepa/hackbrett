@@ -1,6 +1,5 @@
 (ns hackbrett.mapping
-  (:use hackbrett.util
-        clojure.pprint
+  (:use clojure.pprint
         [clojure.tools.logging :only [error]]
         [clojure.java.io :only [copy output-stream delete-file]]
         [somnium.congomongo :as mongo]
@@ -58,8 +57,8 @@
         {old-path :real-filename} (mongo/fetch-and-modify
                                     :samples
                                     {:id-filename filename}
-                                    {:id-filename filename, :real-filename path})]
-    (when (not= old-path path)
+                                    {:id-filename filename, :real-filename path} :upsert? true)]
+    (when (and old-path (not= old-path path))
       (delete-file old-path true))
     path))
 

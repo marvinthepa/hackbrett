@@ -12,7 +12,8 @@
                  [congomongo "0.1.9"]
                  [com.eaio.uuid/uuid "3.3"]
                  ]
-  :repositories {"eaio.com" "http://eaio.com/maven2"}
+  :repositories {"eaio.com" "http://eaio.com/maven2"
+                 "stuartsierra-releases" "http://stuartsierra.com/maven2"}
   :dev-dependencies [[org.clojars.scott/lein-nailgun "1.1.0"]
                      [vimclojure/server "2.3.1"]
                      [ring-mock "0.1.2"]
