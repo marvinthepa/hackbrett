@@ -1,10 +1,16 @@
 # hackbrett
 
-FIXME: write description
+A totally overengineered app that allows to play wav samples and bind them to
+midi signals via http requests.
+(with built-in support for korg nanopad).
 
 ## Usage
 
-FIXME: write
+start mongod
+
+lein ring server
+
+curl http://localhost:3000/help
 
 ## License
 

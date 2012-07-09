@@ -65,7 +65,7 @@
    curl 'http://hackbrett/sample'
  upload a new sample
    curl -T sounds/baby.wav 'http://hackbrett/sample/baby.wav'
- upload a new sample and play it immediately:
+ upload a new sample and play it immediately: (only wav is supported)
    curl -T sounds/baby.wav 'http://hackbrett/sample/baby.wav?play=true'
 
  list existing samples bound to midi-keys:
