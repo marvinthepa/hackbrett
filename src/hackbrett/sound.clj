@@ -7,13 +7,15 @@
 (defn init-samples [db-samples]
   (doseq [sample db-samples
           :let [filename (:real-filename sample)]]
-    (overtone/load-sample filename)))
+    (do
+      (error filename)
+      (overtone/load-sample filename))))
 
 (def load-sample overtone/load-sample) ;; TODO metadata
 
 (defn play-file [filename]
   (if-let [sample (@overtone/loaded-samples*
-                     [(canonical-path filename)nil])]
+                     [(canonical-path filename) nil])]
     (overtone/sample-player sample)
     (warn "no sample with filename " filename)))
 
@@ -29,7 +31,7 @@
 (defn init []
   (defonce _auto-boot_ (overtone/boot-internal-server))
 
-  (init-samples (mapping/get-samples))
+  (init-samples (mapping/fetch-samples))
 
   (overtone/on-event [:midi :note-on]
                      midi-handler

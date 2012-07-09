@@ -10,7 +10,7 @@
 
 ;; TODO split  pad-related and midi-related stuff in their own namespaces
 
-(defn get-samples []
+(defn fetch-samples []
   (mongo/fetch :samples))
 
 (defn get-sample-filename [note]
