@@ -130,5 +130,4 @@ play an existing sample by midi-key:
 (defn init []
   (db/init)
   (sound/init)
-  (mapping/init)
-  )
+  (mapping/init))

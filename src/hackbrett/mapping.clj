@@ -3,7 +3,6 @@
         [clojure.tools.logging :only [error]]
         [clojure.java.io :only [copy output-stream delete-file as-file]]
         [somnium.congomongo :as mongo]
-        [hackbrett.mongo :as db] ;; TODO consider moving to mongo ns
         [hackbrett.util :as util]
         )
   (:import com.eaio.uuid.UUID))
@@ -34,7 +33,8 @@
 
 (defn add-sample [bindings button]
   (assoc button :sample
-         (bindings (:midi-key button))))
+         (:id-filename
+           (bindings (:midi-key button)))))
 
 (defn get-bindings []
   (map clean-binding
@@ -91,4 +91,4 @@
 (defn init []
   (.mkdirs
     (as-file
-      (uploaded-path))))
+      uploaded-path)))
