@@ -1,8 +1,7 @@
 (ns hackbrett.core
   (:use compojure.core
         [ring.util.response :only [redirect]]
-        [clojure.tools.logging :only [error]]
-        )
+        [clojure.tools.logging :only [error]])
   (:require :reload
             [compojure.route :as route]
             [compojure.handler :as handler]
@@ -31,7 +30,6 @@
   (GET "/midi-key" []
        (json (mapping/get-bindings)))
 
-
   (POST ["/midi-key/:midi-key/sample/:sample-name"
          :midi-key #"[0-9]{2,3}"
          :sample-name #"[^/]+"]
@@ -40,8 +38,7 @@
         "")
 
   (GET "/pad" []
-       (json (mapping/get-scenes))
-       )
+       (json (mapping/get-scenes)))
   (GET ["/pad/scene/:scene"
         :scene #"[1-4]"]
        [scene]
@@ -51,50 +48,66 @@
         :button #"[0-9]+"]
        [scene button]
        (json (mapping/get-button (toi scene) (toi button))))
+  (POST ["/pad/scene/:scene/button/:button"
+         :scene #"[0-9]+"
+         :button #"[0-9]+"]
+        [scene button]
+        (let [midi-key (:midi-key (mapping/get-button
+                                    (toi scene)
+                                    (toi button)))]
+          (sound/play-note midi-key)
+          ""))
+  (POST ["/pad/scene/:scene/button/:button/sample/:sample-name"
+         :scene #"[0-9]+"
+         :button #"[0-9]+"
+         :sample-name #"[^/]+"]
+        [scene button sample-name]
+        (let [midi-key (:midi-key (mapping/get-button
+                                    (toi scene)
+                                    (toi button)))]
+          (mapping/bind-sample midi-key sample-name)
+          ""))
 
   (GET "/sample" []
        (json (mapping/get-samples)))
 
   (GET "/help" []
+       repeat
        {
         :content-type "text/plain; charset=utf-8"
         :body
+        (clojure.string/replace
        "Welcome to Hackbrett.
 
- list all existing samples:
-   curl 'http://hackbrett/sample'
- upload a new sample
-   curl -T sounds/baby.wav 'http://hackbrett/sample/baby.wav'
- upload a new sample and play it immediately: (only wav is supported)
-   curl -T sounds/baby.wav 'http://hackbrett/sample/baby.wav?play=true'
+list all samples:
+   curl 'http://%hostname%/sample'
+upload a new sample (only wav is supported):
+   curl -T baby.wav 'http://%hostname%/sample/baby.wav'
+upload a new sample and play it immediately:
+   curl -T baby.wav 'http://%hostname%/sample/baby.wav?play=true'
 
- list existing samples bound to midi-keys:
-   curl 'http://hackbrett/midi-key'
- play an existing sample by midi-key:
-   curl -X POST 'http://hackbrett/midi-key/39'
+show nano-pad and bound samples:
+   curl 'http://%hostname%/pad'
+details:
+   curl 'http://%hostname%/scene/1'
+   curl 'http://%hostname%/scene/1/button/1'
 
-show the mapping of nano-pad scenes and buttons to midi-keys:
-   curl 'http://hackbrett/pad'
-       "})
+bind a sample to a button on nano pad:
+   curl -X POST 'http://%hostname%/scene/1/button/1/sample/baby.wav'
+play a sample by binding on nano-pad:
+   curl -X POST 'http://%hostname%/scene/1/button/1'
 
-;  (POST ["/pad/scene/:scene/button/:button"
-;         :scene #"[0-9]+"
-;         :button #"[0-9]+"]
-;        [scene button]
-;        (mapping/play-sound (toi scene)
-;                          (toi button)))
-;
-;  (POST ["/pad/scene/:scene/button/:button/sample/:sampleid"
-;         :scene #"[0-9]+"
-;         :button #"[0-9]+"
-;         :sampleid #"[0-9]+"]
-;        [scene button sampleid]
-;        (mapping/bind-sample (toi scene)
-;                           (toi button)
-;                           (toi sampleid)))
+list existing samples bound to midi-keys:
+   curl 'http://%hostname%/midi-key'
+play an existing sample by midi-key:
+   curl -X POST 'http://%hostname%/midi-key/39'
+"
+          "%hostname%"
+          (.getHostName (java.net.InetAddress/getLocalHost))
+          )})
 
   ; TODO check if this is a wav file, error or conversion (xuggle.com or mplayer)
-  (PUT ["/sample/:filename" :filename #"[^/]+"] ;; TODO GET on same url..
+  (PUT ["/sample/:filename" :filename #"[^/]+"] ;; TODO GET, POST on same url..
        {{filename :filename play :play} :params
         body :body
         :as request}
@@ -116,4 +129,6 @@ show the mapping of nano-pad scenes and buttons to midi-keys:
 
 (defn init []
   (db/init)
-  (sound/init))
+  (sound/init)
+  (mapping/init)
+  )

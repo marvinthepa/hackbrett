@@ -1,13 +1,16 @@
 (ns hackbrett.mapping
   (:use clojure.pprint
         [clojure.tools.logging :only [error]]
-        [clojure.java.io :only [copy output-stream delete-file]]
+        [clojure.java.io :only [copy output-stream delete-file as-file]]
         [somnium.congomongo :as mongo]
         [hackbrett.mongo :as db] ;; TODO consider moving to mongo ns
+        [hackbrett.util :as util]
         )
   (:import com.eaio.uuid.UUID))
 
 ;; TODO split  pad-related and midi-related stuff in their own namespaces
+;;
+(def uploaded-path "sounds/uploaded/")
 
 (defn fetch-samples []
   (mongo/fetch :samples))
@@ -26,10 +29,24 @@
 (defn clean-binding [binding]
   (select-keys binding [:id-filename :midi-key]))
 
-;; request handlers
+(defn clean-button [button]
+  (select-keys button [:midi-key :scene :button]))
+
+(defn add-sample [bindings button]
+  (assoc button :sample
+         (bindings (:midi-key button))))
+
 (defn get-bindings []
   (map clean-binding
     (mongo/fetch :bindings)))
+
+(defn get-scenes-where [where]
+  (let [bindings (util/group-by-single :midi-key
+                   (get-bindings))]
+    (->>
+      (mongo/fetch :buttons :where where)
+      (map clean-button)
+      (map (partial add-sample bindings)))))
 
 (defn get-binding [midi-key]
   (clean-binding (mongo/fetch-one :bindings :where {:midi-key midi-key})))
@@ -38,20 +55,20 @@
   (map :id-filename
     (mongo/fetch :samples)))
 
+;; TODO could be improved using destructuring and map keys
 (defn get-scenes []
-  (:scenes (db/get-nano-pad)))
-
+  (get-scenes-where {:controller :nano-pad}))
 (defn get-scene [scene]
-  (-> (get-scenes)
-    (find-first :scene scene)))
-
+  (get-scenes-where {:controller :nano-pad
+                     :scene scene}))
 (defn get-button [scene button]
-  (-> (get-scene scene)
-     :buttons
-    (find-first :button button)))
+  (when-let [scenes (get-scenes-where {:controller :nano-pad
+                                       :scene scene
+                                       :button button})]
+    (first scenes)))
 
 (defn add-file [body filename]
-  (let [path (str "sounds/uploaded/" (UUID.) ".wav")
+  (let [path (str uploaded-path (UUID.) ".wav")
         _ (with-open [s (output-stream path)]
             (copy body s))
         {old-path :real-filename} (mongo/fetch-and-modify
@@ -70,3 +87,8 @@
     (mongo/fetch-and-modify :bindings
                             {:midi-key midi-key}
                             {:id-filename sample-name :midi-key midi-key} :upsert? true)))
+
+(defn init []
+  (.mkdirs
+    (as-file
+      (uploaded-path))))

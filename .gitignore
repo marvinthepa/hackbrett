@@ -9,3 +9,4 @@
 .lein-plugins/
 .*.swp
 .swp
+tags
