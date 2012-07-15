@@ -7,9 +7,7 @@
 (defn init-samples [db-samples]
   (doseq [sample db-samples
           :let [filename (:real-filename sample)]]
-    (do
-      (error filename)
-      (overtone/load-sample filename))))
+    (overtone/load-sample filename)))
 
 (def load-sample overtone/load-sample) ;; TODO metadata
 
