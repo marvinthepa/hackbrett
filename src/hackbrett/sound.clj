@@ -9,7 +9,7 @@
           :let [filename (:real-filename sample)]]
     (overtone/load-sample filename)))
 
-(def load-sample overtone/load-sample) ;; TODO metadata
+(def load-sample #'overtone/load-sample)
 
 (defn play-file [filename]
   (if-let [sample (@overtone/loaded-samples*

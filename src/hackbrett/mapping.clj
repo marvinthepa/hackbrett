@@ -22,9 +22,6 @@
                                 :where {:id-filename id-filename})]
     (:real-filename sample)))
 
-(defn find-first [coll key val]
-  (first (filter #(= (% key) val) coll)))
-
 (defn clean-binding [binding]
   (select-keys binding [:id-filename :midi-key]))
 
@@ -87,6 +84,10 @@
     (mongo/fetch-and-modify :bindings
                             {:midi-key midi-key}
                             {:id-filename sample-name :midi-key midi-key} :upsert? true)))
+
+(defn get-real-filename [filename]
+  (when-let [real-file (mongo/fetch-one :samples :where {:id-filename filename})]
+    (:real-filename real-file)))
 
 (defn init []
   (.mkdirs

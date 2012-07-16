@@ -85,6 +85,8 @@ upload a new sample (only wav is supported):
    curl -T baby.wav 'http://%hostname%/sample/baby.wav'
 upload a new sample and play it immediately:
    curl -T baby.wav 'http://%hostname%/sample/baby.wav?play=true'
+play an existing sample:
+   curl -X POST 'http://%hostname%/sample/baby.wav'
 
 show nano-pad and bound samples:
    curl 'http://%hostname%/pad'
@@ -107,7 +109,7 @@ play an existing sample by midi-key:
           )})
 
   ; TODO check if this is a wav file, error or conversion (xuggle.com or mplayer)
-  (PUT ["/sample/:filename" :filename #"[^/]+"] ;; TODO GET, POST on same url..
+  (PUT ["/sample/:filename" :filename #"[^/]+"] ;; TODO GET on same url..
        {{filename :filename play :play} :params
         body :body
         :as request}
@@ -117,6 +119,12 @@ play an existing sample by midi-key:
          (if play
            (sound/play-file real-filename))
          "OK")) ;; TODO stupid, use locator for sample info instead
+
+  (POST ["/sample/:filename" :filename #"[^/]+"]
+        [filename]
+        (let [real-filename (mapping/get-real-filename filename)]
+          (sound/play-file real-filename)
+          ""))
 
   (route/resources "/") ;; TODO
   (route/not-found "404 - Oh noes, there's nothing here!") ;; TODO something cooler
