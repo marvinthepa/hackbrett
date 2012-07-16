@@ -89,13 +89,13 @@ upload a new sample and play it immediately:
 show nano-pad and bound samples:
    curl 'http://%hostname%/pad'
 details:
-   curl 'http://%hostname%/scene/1'
-   curl 'http://%hostname%/scene/1/button/1'
+   curl 'http://%hostname%/pad/scene/1'
+   curl 'http://%hostname%/pad/scene/1/button/1'
 
 bind a sample to a button on nano pad:
-   curl -X POST 'http://%hostname%/scene/1/button/1/sample/baby.wav'
+   curl -X POST 'http://%hostname%/pad/scene/1/button/1/sample/baby.wav'
 play a sample by binding on nano-pad:
-   curl -X POST 'http://%hostname%/scene/1/button/1'
+   curl -X POST 'http://%hostname%/pad/scene/1/button/1'
 
 list existing samples bound to midi-keys:
    curl 'http://%hostname%/midi-key'
@@ -103,7 +103,7 @@ play an existing sample by midi-key:
    curl -X POST 'http://%hostname%/midi-key/39'
 "
           "%hostname%"
-          (.getHostName (java.net.InetAddress/getLocalHost))
+          (str (.getHostName (java.net.InetAddress/getLocalHost)) ":3000") ;; TODO get portname from environment
           )})
 
   ; TODO check if this is a wav file, error or conversion (xuggle.com or mplayer)
