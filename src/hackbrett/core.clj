@@ -103,6 +103,10 @@ list existing samples bound to midi-keys:
    curl 'http://%hostname%/midi-key'
 play an existing sample by midi-key:
    curl -X POST 'http://%hostname%/midi-key/39'
+
+only wav is supported, but if you have mplayer, conversion is easy (also useful if you have a broken wav):
+   mplayer infile.mp3 -vc 'null' -vo 'null' -ao 'pcm:file=outfile.wav'
+if you don't have mplayer, just use http://media.io/
 "
           "%hostname%"
           (str (.getHostName (java.net.InetAddress/getLocalHost)) ":3000") ;; TODO get portname from environment
