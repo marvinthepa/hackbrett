@@ -11,13 +11,13 @@
                                                com.sun.jmx/jmxri]]
                  [congomongo "0.1.9"]
                  [com.eaio.uuid/uuid "3.3"]
+                 [hiccup "1.0.0"]
                  ]
   :repositories {"eaio.com" "http://eaio.com/maven2"
                  "stuartsierra-releases" "http://stuartsierra.com/maven2"}
   :dev-dependencies [[org.clojars.scott/lein-nailgun "1.1.0"]
                      [vimclojure/server "2.3.1"]
                      [ring-mock "0.1.2"]
-                     [ring-serve "0.1.2"]
                      [midje "1.4.0"]
                      [com.stuartsierra/lazytest "1.2.2"]]
   :plugins [[lein-ring "0.7.1"]]

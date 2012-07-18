@@ -1,7 +1,10 @@
 (ns hackbrett.core
   (:use compojure.core
         [ring.util.response :only [redirect]]
-        [clojure.tools.logging :only [error]])
+        [clojure.tools.logging :only [error]]
+        [hiccup.core :only [html]]
+        [hiccup.page :only [doctype]]
+        )
   (:require :reload
             [compojure.route :as route]
             [compojure.handler :as handler]
@@ -14,6 +17,13 @@
 
 (defn toi [x]
   (Integer/parseInt x))
+
+(defn format-as-list [elems]
+  [:ul
+   (->> elems
+     (partition 2)
+     (map (fn [[desc text]]
+            [:li desc [:br] [:code text] ])))])
 
 (defroutes main-routes
   (GET "/" [] (redirect "/help"))
@@ -71,43 +81,42 @@
   (GET "/sample" []
        (json (mapping/get-samples)))
 
+  ;; TODO generate from routes
   (GET "/help" []
        repeat
        {
-        :content-type "text/plain; charset=utf-8"
+        :content-type "text/html; charset=utf-8"
         :body
         (clojure.string/replace
-       "Welcome to Hackbrett.
-
-list all samples:
-   curl 'http://%hostname%/sample'
-upload a new sample (only wav is supported):
-   curl -T baby.wav 'http://%hostname%/sample/baby.wav'
-upload a new sample and play it immediately:
-   curl -T baby.wav 'http://%hostname%/sample/baby.wav?play=true'
-play an existing sample:
-   curl -X POST 'http://%hostname%/sample/baby.wav'
-
-show nano-pad and bound samples:
-   curl 'http://%hostname%/pad'
-details:
-   curl 'http://%hostname%/pad/scene/1'
-   curl 'http://%hostname%/pad/scene/1/button/1'
-
-bind a sample to a button on nano pad:
-   curl -X POST 'http://%hostname%/pad/scene/1/button/1/sample/baby.wav'
-play a sample by binding on nano-pad:
-   curl -X POST 'http://%hostname%/pad/scene/1/button/1'
-
-list existing samples bound to midi-keys:
-   curl 'http://%hostname%/midi-key'
-play an existing sample by midi-key:
-   curl -X POST 'http://%hostname%/midi-key/39'
-
-only wav is supported, but if you have mplayer, conversion is easy (also useful if you have a broken wav):
-   mplayer infile.mp3 -vc 'null' -vo 'null' -ao 'pcm:file=outfile.wav'
-if you don't have mplayer, just use http://media.io/
-"
+          (html
+            (doctype :html5)
+            [:head]
+            [:body
+             [:a {:href "http://github.com/marvinthepa/hackbrett"}
+              [:img {:alt "Fork me on GitHub"
+                     :id "ribbon"
+                     :src "http://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"
+                     :style "position: fixed; top: 0; right: 0; z-index: 2;"}]]
+             [:h1 "Welcome to Hackbrett"]
+             [:h3 "Samples"]
+             (format-as-list
+               ["list all samples" "curl 'http://%hostname%/sample'"
+                "upload a new sample (only wav is supported)" "curl -T baby.wav 'http://%hostname%/sample/baby.wav'"
+                "upload a new sample and play it immediately" "curl -T baby.wav 'http://%hostname%/sample/baby.wav?play=true'"
+                "play an existing sample" "curl -X POST 'http://%hostname%/sample/baby.wav'"])
+             [:h3 "Nano Pad"]
+             (format-as-list
+               ["show nano-pad and bound samples" "curl 'http://%hostname%/pad'"
+                "details for scene" "curl 'http://%hostname%/pad/scene/1'"
+                "details for button" "curl 'http://%hostname%/pad/scene/1/button/1'"
+                "bind a sample to a button on nano pad" "curl -X POST 'http://%hostname%/pad/scene/1/button/1/sample/baby.wav'"
+                "play a sample by binding on nano-pad" "curl -X POST 'http://%hostname%/pad/scene/1/button/1'"
+                ])
+             [:h3 "Notes"]
+             (format-as-list
+               ["only wav is supported, but if you have mplayer, conversion is easy (also useful if you have a broken wav)"
+                "mplayer infile.mp3 -vc 'null' -vo 'null' -ao 'pcm:file=outfile.wav'"
+                "if you don't have mplayer, just use http://media.io/" ""])])
           "%hostname%"
           (str (.getHostName (java.net.InetAddress/getLocalHost)) ":3000") ;; TODO get portname from environment
           )})
